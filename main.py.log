@@ -1,0 +1,41 @@
+grid search: GradientBoostingClassifier
+{'learning_rate': 0.1, 'n_estimators': 101, 'max_depth': 8, 'min_samples_split': 200, 'min_samples_leaf': 50, 'subsample': 0.8, 'random_state': 0}
+time: 0:03:31
+----------------------------------------------------
+grid search: GradientBoostingClassifier
+{'learning_rate': 0.1, 'n_estimators': 101, 'max_depth': 8, 'min_samples_split': 200, 'min_samples_leaf': 50, 'subsample': 0.8, 'random_state': 0}
+time: 0:04:49
+----------------------------------------------------
+gbdt, learning_rate: 0.100, n_estimators: 101, max_depth: 8, min_samples_split: 200, min_samples_leaf: 50, subsample: 0.8
+
+  accuracy: 0.928452
+       auc: 0.873549
+coupon auc: 0.757251
+
+gbdt, learning_rate: 0.100, n_estimators: 101, max_depth: 8, min_samples_split: 200, min_samples_leaf: 50, subsample: 0.8
+
+  accuracy: 0.928452
+       auc: 0.873549
+coupon auc: 0.757251
+
+time: 0:09:21
+----------------------------------------------------
+xgb, learning_rate: 0.010, n_estimators: 1260, max_depth: 8, min_child_weight: 4, gamma: 0.2, subsample: 0.6, colsample_bytree: 0.8
+
+  accuracy: 0.929116
+       auc: 0.875756
+coupon auc: 0.757165
+
+time: 0:01:09
+----------------------------------------------------
+2019-10-06 19:37:36
+time: 0:25:42
+----------------------------------------------------
+gbdt, learning_rate: 0.010, n_estimators: 1900, max_depth: 9, min_samples_split: 200, min_samples_leaf: 50, subsample: 0.8
+
+  accuracy: 0.919861
+       auc: 0.825115
+coupon auc: 0.737819
+
+time: 0:00:44
+----------------------------------------------------
