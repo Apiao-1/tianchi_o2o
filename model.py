@@ -738,8 +738,7 @@ if __name__ == '__main__':
 
     # feature_importance_score()
 
-    # grid_search_gbdt()
-
+    grid_search_gbdt()
     # train_gbdt()
     # predict('gbdt')
 

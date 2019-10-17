@@ -756,17 +756,9 @@ def analysis():
 
     offline, online = get_preprocess_data()
 
-    # t = offline.groupby('Discount_rate').size().reset_index(name='receive_count')
-    # t1 = offline[(offline.Coupon_id != 0) & (offline.Date != date_null)]
-    # t1 = t1.groupby('Discount_rate').size().reset_index(name='consume_count')
-    # t = pd.merge(t, t1, on='Discount_rate')
-    # t['consume_rate'] = t.consume_count / t.receive_count
-
-    # t = offline.groupby('Merchant_id').size().reset_index(name='receive_count')
-    # t1 = offline[(offline.Coupon_id != 0) & (offline.Date != date_null)]
-    # t1 = t1.groupby('Merchant_id').size().reset_index(name='consume_count')
-    # t = pd.merge(t, t1, on='Merchant_id')
-    # t['consume_rate'] = t.consume_count / t.receive_count
+    # Checking for missing data
+    # NAs = pd.concat([data.isnull().sum()], axis=1, keys=['Train'])
+    # NAs[NAs.sum(axis=1) > 0]
 
     t = offline.groupby('Distance').size().reset_index(name='receive_count')
     t1 = offline[(offline.Coupon_id != 0) & (offline.Date != date_null)]
