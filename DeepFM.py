@@ -1,8 +1,8 @@
 import deepctr
 from deepctr import inputs
-from sklearn.metrics import log_loss, roc_auc_score, auc, roc_curve,roc_auc_score
 
 from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold
+from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 import pandas as pd
@@ -34,26 +34,19 @@ if __name__ == '__main__':
     sparse_feature_list = [inputs.SparseFeat(feat, data[feat].nunique()) for feat in sparse_features]
     dense_feature_list = [inputs.DenseFeat(feat, 0, ) for feat in dense_features]
 
-    # fixlen_feature_columns = [inputs.SparseFeat(feat, data[feat].nunique())
-    #                        for feat in sparse_features] + [inputs.DenseFeat(feat, 1,)
-    #                       for feat in dense_features]
-    # sparse_feature_list = dense_feature_list = fixlen_feature_columns
+    train_data, test_data = train_test_split(data,
+                                             train_size=1000,
+                                             # train_size=100000,
+                                             random_state=0,
+                                             # shuffle=True
+                                             )
 
-    # train_data, test_data = train_test_split(data,
-    #                                          train_size=1000,
-    #                                          # train_size=100000,
-    #                                          random_state=0,
-    #                                          # shuffle=True
-    #                                          )
-    #
-    # _, test_data = train_test_split(data, random_state=0)
-    data.drop(columns='Coupon_id')
+    _, test_data = train_test_split(data, random_state=0)
 
-    train, valid = train_test_split(data, test_size=0.2, stratify=data['label'], random_state=0)
-    train_model_input = [train[feat.name].values for feat in sparse_feature_list] + \
-                        [train[feat.name].values for feat in dense_feature_list]
-    valid_model_input = [valid[feat.name].values for feat in sparse_feature_list] + \
-                        [valid[feat.name].values for feat in dense_feature_list]
+    X_train = train_data.copy().drop(columns='Coupon_id')
+    X_test = test_data.copy().drop(columns='Coupon_id')
+    y_test = X_test.pop('label')
+    y_train = X_train.pop('label')
 
     checkpoint_predictions = []
     weights = []
@@ -62,8 +55,7 @@ if __name__ == '__main__':
 
     for model_idx in range(2):
         print('【', 'model_{}'.format(model_idx + 1), '】')
-        model = deepctr.models.DeepFM(
-            sparse_feature_list,dense_feature_list,
+        model = deepctr.models.DeepFM(sparse_feature_list, dense_feature_list,
             dnn_hidden_units=(64, 64),
             dnn_use_bn=True,
             task='binary')
@@ -71,31 +63,38 @@ if __name__ == '__main__':
         for global_epoch in range(2):
             print('【', 'global_epoch_{}'.format(global_epoch + 1), '】')
             model.fit(
-                train_model_input,
-                train['label'].values,
+                X_train,
+                y_train,
                 batch_size=64,
                 epochs=1,
                 verbose=1)
-            checkpoint_predictions.append(model.predict(valid_model_input, batch_size=64).flatten())
+            checkpoint_predictions.append(model.predict(X_test, batch_size=64).flatten())
             weights.append(2 ** global_epoch)
     # clf = fit_eval_metric(clf, X_train, y_train)
 
-    y_true, y_pred = valid['label'].values, np.average(checkpoint_predictions, weights=weights, axis=0)
+    y_true, y_pred = y_test, np.average(checkpoint_predictions, weights=weights, axis=0)
+
+    # log += '%s\n' % classification_report(y_test, y_pred)
+    # log += '  accuracy: %f\n' % accuracy_score(y_true, y_pred)
+    # y_score = clf.predict_proba(X_test)[:, 1]
     log += '       auc: %f\n' % roc_auc_score(y_true, y_pred)
 
-    # avgAUC calculation
-    predictions = np.average(checkpoint_predictions, weights=weights, axis=0)
-    valid1 = valid.copy()
-    valid1['pred_prob'] = list(predictions)
-    vg = valid1.groupby(['Coupon_id'])
+    # coupon average auc 最终的评价指标对每个优惠券coupon_id单独计算预测结果的AUC值
+    coupons = test_data.groupby('Coupon_id').size().reset_index(name='total')
     aucs = []
-    for i in vg:
-        tmpdf = i[1]
-        if len(tmpdf['label'].unique()) != 2:
-            continue
-        fpr, tpr, thresholds = roc_curve(tmpdf['label'], tmpdf['pred_prob'], pos_label=1)
-        aucs.append(auc(fpr, tpr))
-    print('auc: ', np.average(aucs))
+    for _, coupon in coupons.iterrows():
+        if coupon.total > 1:
+            X_test = test_data[test_data.Coupon_id == coupon.Coupon_id].copy()
+            X_test.drop(columns='Coupon_id', inplace=True)
+
+            # 需要去除那些只有一个标签的券，比如某张券全都是1或全都是0，这样的券无法计算AUC值
+            # 相比于召回率、精确率、F1值，数据类不平衡时，AUC表现更好。
+            if len(X_test.label.unique()) != 2:
+                continue
+
+            y_true = X_test.pop('label')
+            # y_score = clf.predict_proba(X_test)[:, 1]
+            aucs.append(roc_auc_score(y_true, y_pred))
 
     log += 'coupon auc: %f\n\n' % np.mean(aucs)
 
