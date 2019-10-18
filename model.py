@@ -198,6 +198,7 @@ def grid_search_xgb(get_param=False):
         'colsample_bytree': .8,
         'scale_pos_weight': 1,
         'reg_alpha': 0,
+        'num_boost_round': 3500,
 
         # 'learning_rate': 1e-1,
         # 'n_estimators': 80,
@@ -233,23 +234,23 @@ def grid_search_xgb(get_param=False):
 def grid_search_lgb(get_param=False):
     params = {
         # 10
-        'learning_rate': 1e-2,
-        'n_estimators': 1200,
-        'num_leaves': 51,
-        'min_split_gain': 0,
-        'min_child_weight': 1e-3,
-        'min_child_samples': 22,
-        'subsample': .8,
-        'colsample_bytree': .8,
-
-        # 'learning_rate': .1,
-        # 'n_estimators': 90,
-        # 'num_leaves': 50,
+        # 'learning_rate': 1e-2,
+        # 'n_estimators': 1200,
+        # 'num_leaves': 51,
         # 'min_split_gain': 0,
         # 'min_child_weight': 1e-3,
-        # 'min_child_samples': 21,
+        # 'min_child_samples': 22,
         # 'subsample': .8,
         # 'colsample_bytree': .8,
+
+        'learning_rate': .025,
+        'n_estimators': 360,
+        'num_leaves': 50,
+        'min_split_gain': 0,
+        'min_child_weight': 1e-3,
+        'min_child_samples': 21,
+        'subsample': .8,
+        'colsample_bytree': .8,
 
         'n_jobs': cpu_jobs,
         'random_state': 0
@@ -639,6 +640,7 @@ def predict(model):
     sample_submission.to_csv('submission_%s.csv' % model,
                              #  float_format='%.5f',
                              index=False, header=False)
+    print("success")
 
 # Blending：用不相交的数据训练不同的 Base Model，将它们的输出取（加权）平均。实现简单，但对训练数据利用少了。
 # 这里的实现其实是stacking的思想
