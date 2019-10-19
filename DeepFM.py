@@ -17,9 +17,13 @@ pd.set_option('display.max_rows', 50)
 pd.set_option('display.max_columns', 200)
 
 if __name__ == '__main__':
-    global log
+    # global log
+    # print(start.strftime('%Y-%m-%d %H:%M:%S'))
+    # logger.init_logger()
+    log = logger.get_logger()
 
-    data = feature.get_train_data()[:2000]
+
+    data = feature.get_train_data()
 
     sparse_features = ['weekday', 'day', 'discount_type']
     dense_features = [fea for fea in data.columns if fea not in sparse_features and fea not in ['Coupon_id','label']]
@@ -30,13 +34,14 @@ if __name__ == '__main__':
     mms = MinMaxScaler(feature_range=(0, 1))
     data[dense_features] = mms.fit_transform(data[dense_features])
 
-    # print(X_train.describe())
     sparse_feature_list = [inputs.SparseFeat(feat, data[feat].nunique()) for feat in sparse_features]
-    dense_feature_list = [inputs.DenseFeat(feat, 0, ) for feat in dense_features]
+    dense_feature_list = [inputs.DenseFeat(feat, 1, ) for feat in dense_features]
+
+    dnn_feature_columns = linear_feature_columns = sparse_feature_list + dense_feature_list
 
     train_data, test_data = train_test_split(data,
-                                             train_size=1000,
-                                             # train_size=100000,
+                                             # train_size=1000,
+                                             train_size=100000,
                                              random_state=0,
                                              # shuffle=True
                                              )
@@ -44,9 +49,15 @@ if __name__ == '__main__':
     _, test_data = train_test_split(data, random_state=0)
 
     X_train = train_data.copy().drop(columns='Coupon_id')
+    y_train = X_train.pop('label')
+
     X_test = test_data.copy().drop(columns='Coupon_id')
     y_test = X_test.pop('label')
-    y_train = X_train.pop('label')
+
+    feature_names = deepctr.inputs.get_feature_names(linear_feature_columns + dnn_feature_columns)
+
+    X_train = {name:X_train[name] for name in feature_names}
+    X_test = {name:X_test[name] for name in feature_names}
 
     checkpoint_predictions = []
     weights = []
@@ -55,8 +66,8 @@ if __name__ == '__main__':
 
     for model_idx in range(2):
         print('【', 'model_{}'.format(model_idx + 1), '】')
-        model = deepctr.models.DeepFM(sparse_feature_list, dense_feature_list,
-            dnn_hidden_units=(64, 64),
+        model = deepctr.models.DeepFM(linear_feature_columns, dnn_feature_columns,
+            # dnn_hidden_units=(64, 64),
             dnn_use_bn=True,
             task='binary')
         model.compile("adam", "binary_crossentropy", metrics=['binary_crossentropy'], )
@@ -72,8 +83,9 @@ if __name__ == '__main__':
             weights.append(2 ** global_epoch)
     # clf = fit_eval_metric(clf, X_train, y_train)
 
-    y_true, y_pred = y_test, np.average(checkpoint_predictions, weights=weights, axis=0)
-
+    y_true, y_pred = y_test, list(np.average(checkpoint_predictions, weights=weights, axis=0))
+    test_data['y_pred'] = y_pred
+    print(test_data.head())
     # log += '%s\n' % classification_report(y_test, y_pred)
     # log += '  accuracy: %f\n' % accuracy_score(y_true, y_pred)
     # y_score = clf.predict_proba(X_test)[:, 1]
@@ -92,10 +104,13 @@ if __name__ == '__main__':
             if len(X_test.label.unique()) != 2:
                 continue
 
-            y_true = X_test.pop('label')
+            # y_true = X_test.pop('label')
+            # print(y_true)
             # y_score = clf.predict_proba(X_test)[:, 1]
-            aucs.append(roc_auc_score(y_true, y_pred))
+            aucs.append(roc_auc_score(X_test.label, X_test.y_pred))
 
     log += 'coupon auc: %f\n\n' % np.mean(aucs)
 
     logger.set_logger(log)
+
+    print(log)

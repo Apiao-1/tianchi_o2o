@@ -16,8 +16,6 @@ if __name__ == '__main__':
 
     start = datetime.datetime.now()
     print(start.strftime('%Y-%m-%d %H:%M:%S'))
-    # Logger = log.Logger(start)
-    # log = Logger.get_logger()
     logger.init_logger(start)
     cpu_jobs = os.cpu_count() - 1
     date_null = pd.to_datetime('1970-01-01', format='%Y-%m-%d')
@@ -60,8 +58,8 @@ if __name__ == '__main__':
     # train_et_entropy()
     # predict('et_entropy')
 
-    model.blending()
-    # model.predict('blending')
+    # model.blending()
+    model.predict('blending')
 
     log = logger.get_logger()
     log += 'time: %s\n' % str((datetime.datetime.now() - start)).split('.')[0]
