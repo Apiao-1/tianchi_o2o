@@ -59,7 +59,26 @@
 
 # Model
 
-1. 
+1. 衡量损失的标准：优惠券侧的AUC，按优惠券id进行group，分别结算每个id对应的auc最后取平均值
+
+2. 自动化网格搜索，pipeline，三重循环：
+
+   1. 最外层的while控制全局最优，任何一个参数发生了变化就要重新再调整，达到全局最优；
+
+   2. 第二层for循环调整各个参数
+
+   3. 最内层遍历单个参数的所有可能取值达到局部最优
+   
+   4. 和普通网格搜索的区别在于：普通网格只有两重循环，各个参数只达到了局部最优
+   
+3. 用到的模型：
+   
+   1. 树模型： 'gbdt', 'xgb', 'lgb', 'cat','rf_gini', 'et_gini',rf_entropy.et_entropy
+   2. FM:DeepFM + logistic
+   
+4. 最后用 'gbdt', 'xgb', 'lgb', 'cat'四个模型做了两层的stacking，第二层用的logistic得到最后的预测
+
+      
 
 
 

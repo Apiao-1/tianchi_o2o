@@ -3,6 +3,7 @@
 1. 对不同时期的特征建模再stacking
 2. 对不同正负样本比例的数据集进行建模
 3. GPU优化
+4. 尝试StackNet做多层的stacking
 
 
 
