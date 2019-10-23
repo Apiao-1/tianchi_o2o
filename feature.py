@@ -785,21 +785,21 @@ def analysis():
     print('Discount_rate 类型:', offline['Discount_rate'].unique())
     print('Distance 类型:', offline['Distance'].unique())
 
-    date_received = dfoff['Date_received'].unique()
+    date_received = offline['Date_received'].unique()
     date_received = sorted(date_received[date_received != 'null'])
 
-    date_buy = dfoff['Date'].unique()
+    date_buy = offline['Date'].unique()
     date_buy = sorted(date_buy[date_buy != 'null'])
 
-    date_buy = sorted(dfoff[dfoff['Date'] != 'null']['Date'])
+    date_buy = sorted(offline[offline['Date'] != 'null']['Date'])
     print('优惠券收到日期从', date_received[0], '到', date_received[-1])
     print('消费日期从', date_buy[0], '到', date_buy[-1])
 
     # 看一下每天的顾客收到coupon的数目，以及收到coupon后用coupon消费的数目。见analysis1.png
-    couponbydate = dfoff[dfoff['Date_received'] != 'null'][['Date_received', 'Date']].groupby(['Date_received'],
+    couponbydate = offline[offline['Date_received'] != 'null'][['Date_received', 'Date']].groupby(['Date_received'],
                                                                                               as_index=False).count()
     couponbydate.columns = ['Date_received', 'count']
-    buybydate = dfoff[(dfoff['Date'] != 'null') & (dfoff['Date_received'] != 'null')][
+    buybydate = offline[(offline['Date'] != 'null') & (offline['Date_received'] != 'null')][
         ['Date_received', 'Date']].groupby(['Date_received'], as_index=False).count()
     buybydate.columns = ['Date_received', 'count']
 
