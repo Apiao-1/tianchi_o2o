@@ -4,7 +4,7 @@
 
 ### EDA & 数据预处理
 
-1. 查看变量之间的分布,发现样本的标签不均衡，训练集中正负样本比例达到了1:8(少部分人用优惠券消费了，大部人没消费或没使用优惠券)，针对不同的模型可能要考虑欠采样或者过采样（比如XGBoost就能很好处理不平衡的数据）,正负样本数量差别很大,这也是为什么会使用 AUC 作为模型性能评估标准的原因。
+1. 查看变量之间的分布,发现样本的标签不均衡，训练集中正负样本比例达到了1:8(少部分人用优惠券消费了，大部人没消费或没使用优惠券)，针对不同的模型可能要考虑欠采样或者过采样（比如XGBoost就能很好处理不平衡的数据）,正负样本数量差别很大,这也是为什么会使用 AUC 作为模型性能评估标准的原因。（如何解决样本不平衡问题？ 使用StratifiedKFold和StratifiedShuffleSplit 分层抽样。 一些分类问题在目标类别的分布上可能表现出很大的不平衡性：例如，可能会出现比正样本多数倍的负样本。在这种情况下，建议采用如 StratifiedKFold 和 StratifiedShuffleSplit 中实现的分层抽样方法，确保相对的类别频率在每个训练和验证 折叠 中大致保留。）
 
    ![img](https://img-blog.csdn.net/20161228120229789?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvQnJ5YW5fXw==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
 
